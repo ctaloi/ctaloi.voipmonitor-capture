@@ -1,0 +1,69 @@
+---
+# tasks file for roles/voipmonitor-capture
+
+  - name: install voipmonitor capture required packages
+    apt: pkg={{ item }} update_cache=yes cache_valid_time=3600
+    with_items:
+      - tshark
+      - mtr
+      - librsvg2-bin
+      - gsfonts
+      - mysql-server
+
+  - name: download voipmonitor capture binary
+    unarchive: src=http://www.voipmonitor.org/current-stable-sniffer-static-64bit.tar.gz dest=/usr/src copy=no creates=/usr/src/voipmonitor-amd64-{{voipmon_version}}-static
+
+  - name: ensure directories exist
+    file: path={{ item }} state=directory
+    with_items:
+      - /usr/local/share/voipmonitor/audio
+      - /usr/local/sbin
+      - /var/spool/voipmonitor
+
+  - name: install voipmonitor files (install.sh)
+    command: cp {{ item.src }} {{ item.dest }}
+    with_items:
+      - { src: '{{voipmon_src_path}}/usr/local/share/voipmonitor/audio/mos_lqe_original_16khz.wav', dest:  '/usr/local/share/voipmonitor/audio/mos_lqe_original_16khz.wav' }
+      - { src: '{{voipmon_src_path}}/usr/local/share/voipmonitor/audio/mos_lqe_original.wav', dest:  '/usr/local/share/voipmonitor/audio/mos_lqe_original.wav' }
+      - { src: '{{voipmon_src_path}}/usr/local/sbin/voipmonitor', dest:  '/usr/local/sbin/voipmonitor' }
+      - { src: '{{voipmon_src_path}}/etc/voipmonitor.conf', dest:  '/etc/voipmonitor.conf' }
+      - { src: '{{voipmon_src_path}}/etc/init.d/voipmonitor', dest:  '/etc/init.d/voipmonitor' }
+
+  - name: enable VoIP monitor on boot
+    service: name=voipmonitor enabled=yes
+
+  - name: edit VoIP monitor db host
+    lineinfile: >
+      dest=/etc/voipmonitor.conf
+      state=present
+      line="mysqlhost = {{voipmon_db_host}}"
+      backup=yes
+      regexp='mysqlhost'
+    notify: restart voipmonitor
+
+  - name: edit VoIP monitor db password
+    lineinfile: >
+      dest=/etc/voipmonitor.conf
+      state=present
+      line="mysqlpassword = {{voipmon_db_password}}"
+      backup=yes
+      regexp='mysqlpassword'
+    notify: restart voipmonitor
+
+  - name: edit VoIP monitor db username
+    lineinfile: >
+      dest=/etc/voipmonitor.conf
+      state=present
+      line="mysqlusername = {{voipmon_db_username}}"
+      backup=yes
+      regexp='mysqlusername'
+    notify: restart voipmonitor
+
+  - name: edit VoIP monitor capture interface
+    lineinfile: >
+      dest=/etc/voipmonitor.conf
+      state=present
+      line="interface = {{voipmon_interface}}"
+      backup=yes
+      regexp='interface'
+    notify: restart voipmonitor

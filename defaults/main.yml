@@ -1,0 +1,11 @@
+---
+# defaults file for roles/voipmonitor-capture
+
+voipmon_version: 16.1
+voipmon_src_path: /usr/src/voipmonitor-amd64-{{voipmon_version}}-static
+
+# override the following in your playbook when calling the role
+voipmon_db_host: localhost
+voipmon_db_username: voipmonitor
+voipmon_db_password: secret
+voipmon_interface: any

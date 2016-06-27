@@ -1,0 +1,5 @@
+---
+# handlers file for roles/voipmonitor-capture
+
+  - name: restart voipmonitor
+    service: name=voipmonitor state=restarted enabled=yes
