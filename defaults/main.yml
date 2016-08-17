@@ -1,7 +1,7 @@
 ---
 # defaults file for roles/voipmonitor-capture
 
-voipmon_version: 16.1
+voipmon_version: 17.0.1
 voipmon_src_path: /usr/src/voipmonitor-amd64-{{voipmon_version}}-static
 
 # override the following in your playbook when calling the role
